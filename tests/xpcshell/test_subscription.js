@@ -1,5 +1,5 @@
 
-Components.utils.import("resource://requestpolicy/Subscription.jsm");
+Components.utils.import("chrome://requestpolicy/content/modules/Subscription.jsm");
 
 function run_test() {
   test_1();

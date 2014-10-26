@@ -1,19 +1,21 @@
-Components.utils.import("resource://requestpolicy/DomainUtil.jsm");
-Components.utils.import("resource://requestpolicy/Logger.jsm");
-Components.utils.import("resource://requestpolicy/Subscription.jsm");
-Components.utils.import("resource://requestpolicy/Util.jsm");
-Components.utils.import("resource://requestpolicy/PolicyManager.jsm");
 
-var rpService = Components.classes["@requestpolicy.com/requestpolicy-service;1"]
-    .getService().wrappedJSObject;
+const Ci = Components.interfaces;
+const Cc = Components.classes;
+const Cu = Components.utils;
 
-var observerService = Components.classes["@mozilla.org/observer-service;1"]
-    .getService(Components.interfaces.nsIObserverService);
+Cu.import("resource://gre/modules/Services.jsm");
 
-var stringBundleService = Components.classes["@mozilla.org/intl/stringbundle;1"]
-    .getService(Components.interfaces.nsIStringBundleService);
-strbundle = stringBundleService.createBundle(
-    "chrome://requestpolicy/locale/requestpolicy.properties");
+Cu.import("chrome://requestpolicy/content/lib/script-loader.jsm");
+ScriptLoader.importModules([
+  "utils",
+  "prefs",
+  "domain-util",
+  "logger",
+  "subscription",
+  "policy-manager",
+  "requestpolicy-service"
+], this);
+
 
 const COMMON_STRINGS = [
   'preferences',
@@ -28,9 +30,9 @@ const COMMON_STRINGS = [
 function _(msg, args) {
   if (args) {
     args = Array.prototype.slice.call(arguments, 1);
-    return strbundle.formatStringFromName(msg, args, args.length);
+    return Utils.strbundle.formatStringFromName(msg, args, args.length);
   } else {
-    return strbundle.GetStringFromName(msg);
+    return Utils.strbundle.GetStringFromName(msg);
   }
 }
 
@@ -46,8 +48,8 @@ common = {};
 common.switchSubscriptionPolicies = function () {
   var subscriptions = new UserSubscriptions();
 
-  var newDefaultPolicy = rpService._defaultAllow ? 'allow' : 'deny';
-  var oldDefaultPolicy = rpService._defaultAllow ? 'deny' : 'allow';
+  var newDefaultPolicy = Prefs.isDefaultAllow() ? 'allow' : 'deny';
+  var oldDefaultPolicy = Prefs.isDefaultAllow() ? 'deny' : 'allow';
 
   var oldSubInfo = subscriptions.getSubscriptionInfo(oldDefaultPolicy);
   for (var listName in oldSubInfo) {
@@ -170,8 +172,7 @@ common.getOldRulesAsNewRules = function (addHostWildcard) {
 
 common.getPrefObj = function (pref) {
   try {
-    var value = rpService.prefs
-        .getComplexValue(pref, Components.interfaces.nsISupportsString).data;
+    var value = prefs.getComplexValue(pref, Ci.nsISupportsString).data;
   } catch (e) {
     value = '';
   }
@@ -191,13 +192,13 @@ common.prefStringToObj = function (prefString) {
 
 common.clearPref = function (pref) {
   try {
-    if (rpService.prefs.prefHasUserValue(pref)) {
-      rpService.prefs.clearUserPref(pref);
+    if (Prefs.prefs.prefHasUserValue(pref)) {
+      Prefs.prefs.clearUserPref(pref);
     }
   } catch (e) {
     Logger.dump('Clearing pref failed: ' + e.toString());
   }
-  rpService._prefService.savePrefFile(null);
+  Services.prefs.savePrefFile(null);
 };
 
 common.addAllowRules = function (rules) {

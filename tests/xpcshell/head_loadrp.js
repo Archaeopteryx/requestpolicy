@@ -44,19 +44,26 @@ compDir.append("src");
 Components.manager instanceof Components.interfaces.nsIComponentRegistrar;
 Components.manager.autoRegister(compDir);
 
-// Setup resource://requestpolicy (since chrome.manifest wasn't loaded).
+// Setup chrome://requestpolicy/content/modules
 let ioService = Components.classes["@mozilla.org/network/io-service;1"]
-                          .getService(Components.interfaces.nsIIOService);
+    .getService(Components.interfaces.nsIIOService);
 let resProt = ioService.getProtocolHandler("resource")
-                       .QueryInterface(Components.interfaces.nsIResProtocolHandler);
+    .QueryInterface(Components.interfaces.nsIResProtocolHandler);
 let aliasFile = Components.classes["@mozilla.org/file/local;1"]
-                          .createInstance(Components.interfaces.nsILocalFile);
+    .createInstance(Components.interfaces.nsILocalFile);
 let modulesDir = cwd.parent.parent.clone();
 modulesDir.append("src");
+modulesDir.append("content");
 modulesDir.append("modules");
 aliasFile.initWithPath(modulesDir.path);
 let aliasURI = ioService.newFileURI(aliasFile);
 resProt.setSubstitution("requestpolicy", aliasURI);
+
+// register chrome://* URIs
+let cr = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
+    .getService(Components.interfaces.nsIChromeRegistry);
+cr.checkForNewChrome();
+
 
 // Setup the Logger module to use |print| instead of |dump| because that's
 // what's available for xpcshell tests.
@@ -66,7 +73,12 @@ if (!requestpolicy) {
   };
 }
 
-Components.utils.import("resource://requestpolicy/Logger.jsm");
+//var loader = CC["@mozilla.org/moz/jssubscript-loader;1"]
+//    .getService(CI.mozIJSSubScriptLoader);
+//loader.loadSubScript("chrome://requestpolicy/content/modules/Logger.jsm");
+
+
+Components.utils.import("chrome://requestpolicy/content/modules/Logger.jsm");
 Logger.printFunc = function (msg) {
   print(msg.trimRight());
 }

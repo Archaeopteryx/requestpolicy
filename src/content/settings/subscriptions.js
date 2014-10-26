@@ -24,7 +24,7 @@ var prefsChangedObserver = null;
 
 
 function updateDisplay() {
-  var userSubs = rpService._subscriptions;
+  var userSubs = rpService.getSubscriptions();
   var subsInfo = userSubs.getSubscriptionInfo();
   for (var subName in subsInfo['official']) {
     var el = document.getElementById('sub-' + subName);
@@ -38,7 +38,7 @@ function updateDisplay() {
 
 function onload() {
   updateDisplay();
-  var userSubs = rpService._subscriptions;
+  var userSubs = rpService.getSubscriptions();
 
   function handleSubscriptionChange(event) {
     var subName = event.target.name;
@@ -75,7 +75,7 @@ function onload() {
   }
 
   var selector = '[data-default-policy=' +
-    (rpService._defaultAllow ? 'deny' : 'allow') + ']';
+    (Prefs.isDefaultAllow() ? 'deny' : 'allow') + ']';
   var matches = document.body.querySelectorAll(selector);
   var hideElements = Array.prototype.slice.call(matches);
   for (var i = 0; i < hideElements.length; i++) {

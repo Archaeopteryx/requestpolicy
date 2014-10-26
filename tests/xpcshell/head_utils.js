@@ -1,4 +1,7 @@
-Components.utils.import("resource://requestpolicy/FileUtil.jsm");
+//Components.utils.import("chrome://requestpolicy/content/modules/FileUtil.jsm");
+var loader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+    .getService(Components.interfaces.mozIJSSubScriptLoader);
+loader.loadSubScript("chrome://requestpolicy/content/modules/FileUtil.jsm");
 
 function copyRulesetFileToProfile(filename, destFilename) {
   if (!destFilename) {
