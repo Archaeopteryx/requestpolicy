@@ -68,7 +68,7 @@ function getAllSubscriptionElements() {
 }
 
 function updateDisplay() {
-  var userSubs = rpService._subscriptions;
+  var userSubs = rpService.getSubscriptions();
   var subsInfo = userSubs.getSubscriptionInfo();
   var allSubElements = getAllSubscriptionElements();
   debugger;
@@ -89,7 +89,7 @@ function updateDisplay() {
 
 
 function handleSubscriptionCheckboxChange(event) {
-  var userSubs = rpService._subscriptions;
+  var userSubs = rpService.getSubscriptions();
 
   var subName = event.target.name;
   var enabled = event.target.checked;
@@ -125,6 +125,14 @@ function onload() {
       continue;
     }
     el.addEventListener('change', handleSubscriptionCheckboxChange);
+  }
+
+  var selector = '[data-default-policy=' +
+    (Prefs.isDefaultAllow() ? 'deny' : 'allow') + ']';
+  var matches = document.body.querySelectorAll(selector);
+  var hideElements = Array.prototype.slice.call(matches);
+  for (var i = 0; i < hideElements.length; i++) {
+    hideElements[i].style.display = 'none';
   }
 
   prefsChangedObserver = new common.PrefsChangedObserver(
